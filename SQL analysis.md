@@ -1,11 +1,12 @@
-<span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запитів</span>
-<span style="color:#000080; font-family:'Georgia', serif;">1. This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity.</span>
-<span style="color:#8B0000; font-family:'Georgia', serif;">1. Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти.</span>
-Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.
+# <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
 
-<span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
-sql
-Копировать
+## <span style="color:#000080; font-family:'Georgia', serif;">This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity. It computes key metrics (account count, sent, open, and click-through messages) across dimensions such as date, country, send interval, verification, and subscription status. Using multiple CTEs and UNION, it calculates country-level totals and ranks, filtering to the top 10 countries. The resulting dataset serves as the basis for Looker Studio visualizations to compare user behavior and identify key markets.</span>
+
+## <span style="color:#8B0000; font-family:'Georgia', serif;">Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти. Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.</span>
+
+### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
+
+```sql
 -- Основний SQL-запит для аналізу даних про акаунти та email-активність.
 WITH account_details AS (
     -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
@@ -25,8 +26,8 @@ WITH account_details AS (
 ),
 email_details AS (
     -- CTE: Рахуємо основні метрики email-активності:
-    -- кількість відправлених (sent_msg), відкритих (open_msg) та переходів по email (visit_msg)
-    -- у розрізі дати відправлення email, країни, інтервалу відправлення, верифікації та підписки.
+    -- кількість відправлених (sent_msg), відкритих (open_msg) та переходів по email (visit_msg) у розрізі
+    -- дати відправлення email, країни, інтервалу відправлення, верифікації та підписки.
     SELECT
         DATE_ADD(s.date, INTERVAL es.sent_date DAY) AS date, -- Обчислення дати з урахуванням інтервалу відправлення.
         sp.country,                            -- Країна користувача.
@@ -79,10 +80,10 @@ union_all AS (
         send_interval,
         is_verified,
         is_unsubscribed,
-        SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів (без NULL значень).
-        SUM(sent_msg) AS sent_msg,             -- Сумарна кількість відправлених email (без NULL значень).
-        SUM(open_msg) AS open_msg,             -- Сумарна кількість відкритих email (без NULL значень).
-        SUM(visit_msg) AS visit_msg            -- Сумарна кількість переходів по email (без NULL значень).
+        SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів, без NULL значень.
+        SUM(sent_msg) AS sent_msg,             -- Сумарна кількість відправлених email, без NULL значень.
+        SUM(open_msg) AS open_msg,             -- Сумарна кількість відкритих email, без NULL значень.
+        SUM(visit_msg) AS visit_msg            -- Сумарна кількість переходів по email, без NULL значень.
     FROM combined_data
     GROUP BY date, country, send_interval, is_verified, is_unsubscribed
 ),
@@ -118,28 +119,3 @@ SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
-<span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span> <span style="color:#008080; font-family:'Georgia', serif; font-size:16px;"> Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення (не NULL).
-Вивожу інформацію в розрізі пристроїв (<code>device</code>). </span>
-
-sql
-Копировать
--- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
-SELECT
-    sp.device AS device,  -- Тип пристрою
-    -- Розрахунок долі: сума подій з session_engaged = '1' поділена на загальну кількість подій
-    ROUND(
-        SUM(CASE WHEN ep.value.string_value = '1' THEN 1 ELSE 0 END) / COUNT(*),
-        5
-    ) AS session_ratio  -- Доля сесій з engaged (округлено до 5 знаків)
-FROM
-    `DA.event_params` p,
-    UNNEST(p.event_params) AS ep  -- Розпаковуємо масив event_params
-JOIN 
-    `DA.session_params` sp ON sp.ga_session_id = p.ga_session_id  -- З'єднуємо з інформацією сесій
-WHERE
-    ep.key = 'session_engaged'           -- Фільтруємо за ключем session_engaged
-    AND ep.value.string_value IS NOT NULL -- Враховуємо лише записи, де значення не NULL
-GROUP BY 
-    sp.device  -- Групуємо результати за пристроєм
-ORDER BY 
-    session_ratio DESC;  -- Сортуємо за спаданням долі сесій
