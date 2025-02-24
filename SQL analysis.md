@@ -119,3 +119,30 @@ SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
+
+# <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+
+## <span style="color:#000080; font-family:'Georgia', serif;">Завдання: Порахувати відсоток витрат по місяцях від загальних витрат за весь період</span>
+
+<span style="color:#8B0000; font-family:'Georgia', serif;">
+Використай window функцію для обчислення відсотків. Подай результат у форматі, де для кожного місяця відображається відсоток від загальних витрат.
+</span>
+
+### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
+
+```sql
+-- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
+SELECT
+    sales_month,                 -- Місяць (формат: 'YYYY-MM')
+    cost_by_month,               -- Загальна сума витрат за місяць
+    -- Обчислення відсотку: витрати за місяць поділені на загальну суму витрат * 100
+    cost_by_month / SUM(cost_by_month) OVER () * 100 AS percentage_of_total_expenses
+FROM (
+    SELECT
+        FORMAT_TIMESTAMP('%Y-%m', date) AS sales_month,  -- Форматуємо дату до формату 'YYYY-MM'
+        SUM(cost) AS cost_by_month                        -- Обчислюємо загальну суму витрат за місяць
+    FROM `DA.paid_search_cost`
+    GROUP BY sales_month                                  -- Групуємо дані за місяцем
+) AS montly_cost
+ORDER BY sales_month;  -- Сортуємо результати за місяцем
+
