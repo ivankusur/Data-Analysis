@@ -6,7 +6,7 @@
 
 #### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
 
-```
+```sql
 -- Основний SQL-запит для аналізу даних про акаунти та email-активність.
 WITH account_details AS (
     -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
@@ -119,6 +119,7 @@ SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
+```
 
 # <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
 
@@ -129,6 +130,7 @@ ORDER BY date, country;
 </span>
 
 ### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
+
 
 ```sql
 -- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
@@ -145,7 +147,4 @@ FROM (
     GROUP BY sales_month                                  -- Групуємо дані за місяцем
 ) AS montly_cost
 ORDER BY sales_month;  -- Сортуємо результати за місяцем;
-
-
-
-
+```
