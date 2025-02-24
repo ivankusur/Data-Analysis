@@ -1,12 +1,16 @@
-## <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запитів</span>
 
-### <span style="color:#000080; font-family:'Georgia', serif;">This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity. It computes key metrics (account count, sent, open, and click-through messages) across dimensions such as date, country, send interval, verification, and subscription status. Using multiple CTEs and UNION, it calculates country-level totals and ranks, filtering to the top 10 countries. The resulting dataset serves as the basis for Looker Studio visualizations to compare user behavior and identify key markets.</span>
+---
 
-### <span style="color:#8B0000; font-family:'Georgia', serif;">Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти. Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.</span>
+## <span style="color:#000080; font-family:'Georgia', serif;">1. This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity.</span>
+
+### <span style="color:#8B0000; font-family:'Georgia', serif;">1. Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти.</span>
+
+> Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.
 
 #### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
 
-```sql
+'''sql
 -- Основний SQL-запит для аналізу даних про акаунти та email-активність.
 WITH account_details AS (
     -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
@@ -26,8 +30,8 @@ WITH account_details AS (
 ),
 email_details AS (
     -- CTE: Рахуємо основні метрики email-активності:
-    -- кількість відправлених (sent_msg), відкритих (open_msg) та переходів по email (visit_msg) у розрізі
-    -- дати відправлення email, країни, інтервалу відправлення, верифікації та підписки.
+    -- кількість відправлених (sent_msg), відкритих (open_msg) та переходів по email (visit_msg) 
+    -- у розрізі дати відправлення email, країни, інтервалу відправлення, верифікації та підписки.
     SELECT
         DATE_ADD(s.date, INTERVAL es.sent_date DAY) AS date, -- Обчислення дати з урахуванням інтервалу відправлення.
         sp.country,                            -- Країна користувача.
@@ -80,10 +84,10 @@ union_all AS (
         send_interval,
         is_verified,
         is_unsubscribed,
-        SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів, без NULL значень.
-        SUM(sent_msg) AS sent_msg,             -- Сумарна кількість відправлених email, без NULL значень.
-        SUM(open_msg) AS open_msg,             -- Сумарна кількість відкритих email, без NULL значень.
-        SUM(visit_msg) AS visit_msg            -- Сумарна кількість переходів по email, без NULL значень.
+        SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів (без NULL значень).
+        SUM(sent_msg) AS sent_msg,           -- Сумарна кількість відправлених email (без NULL значень).
+        SUM(open_msg) AS open_msg,           -- Сумарна кількість відкритих email (без NULL значень).
+        SUM(visit_msg) AS visit_msg          -- Сумарна кількість переходів по email (без NULL значень).
     FROM combined_data
     GROUP BY date, country, send_interval, is_verified, is_unsubscribed
 ),
@@ -119,25 +123,48 @@ SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
-```
+'''
 
-# <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+---
 
-## <span style="color:#000080; font-family:'Georgia', serif;">Завдання: Порахувати відсоток витрат по місяцях від загальних витрат за весь період</span>
-
-<span style="color:#8B0000; font-family:'Georgia', serif;">
-Використай window функцію для обчислення відсотків. Подай результат у форматі, де для кожного місяця відображається відсоток від загальних витрат.
-</span>
-
-### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
-
-
-```sql
--- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
+<span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
+<span style="color:#008080; font-family:'Georgia', serif; font-size:16px;">
+Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>).
+Вивожу інформацію в розрізі пристроїв (<code>device</code>). </span>
+'''sql
+-- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
 SELECT
-    sales_month,                 -- Місяць (формат: 'YYYY-MM')
-    cost_by_month,               -- Загальна сума витрат за місяць
-    -- Обчислення відсотку: витрати за місяць поділені на загальну суму витрат * 100
+    sp.device AS device,  -- Тип пристрою
+    -- Розрахунок долі: сума подій з session_engaged = '1' поділена на загальну кількість подій
+    ROUND(
+        SUM(CASE WHEN ep.value.string_value = '1' THEN 1 ELSE 0 END) / COUNT(*),
+        5
+    ) AS session_ratio  -- Доля сесій з engaged (округлено до 5 знаків)
+FROM
+    `DA.event_params` p,
+    UNNEST(p.event_params) AS ep  -- Розпаковуємо масив event_params
+JOIN 
+    `DA.session_params` sp ON sp.ga_session_id = p.ga_session_id  -- З'єднуємо з інформацією сесій
+WHERE
+    ep.key = 'session_engaged'           -- Фільтруємо за ключем session_engaged
+    AND ep.value.string_value IS NOT NULL -- Враховуємо лише записи, де значення не NULL
+GROUP BY 
+    sp.device  -- Групуємо результати за пристроєм
+ORDER BY 
+    session_ratio DESC;  -- Сортуємо за спаданням долі сесій
+    '''
+
+---
+
+<span style="color:#1E90FF; font-family:'Arial', sans-serif;">3. SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+<span style="color:#000080; font-family:'Georgia', serif;">Рахую відсоток витрат по місяцях від загальних витрат за весь період</span>
+<span style="color:#8B0000; font-family:'Georgia', serif;"> Використовую window функцію для обчислення відсотків. Представляю результат у форматі, де для кожного місяця відображається відсоток від загальних витрат. </span>
+<span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
+'''sql-- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
+SELECT
+    sales_month,                  -- Місяць (формат: 'YYYY-MM')
+    cost_by_month,                -- Загальна сума витрат за місяць
+    -- Обчислення відсотку: витрати за місяць / загальна сума витрат * 100
     cost_by_month / SUM(cost_by_month) OVER () * 100 AS percentage_of_total_expenses
 FROM (
     SELECT
@@ -146,5 +173,37 @@ FROM (
     FROM `DA.paid_search_cost`
     GROUP BY sales_month                                  -- Групуємо дані за місяцем
 ) AS montly_cost
-ORDER BY sales_month;  -- Сортуємо результати за місяцем;
-```
+ORDER BY 
+    sales_month;  -- Сортуємо результати за місяцем
+    '''
+
+---
+
+<span style="color:#1E90FF; font-family:'Arial', sans-serif;">4. SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+<span style="color:#000080; font-family:'Georgia', serif;">Рахую кількість івентів типу <code>user_engagement</code> тільки для тих сесій, в яких загальна кількість івентів перевищує 2.</span>
+<span style="color:#8B0000; font-family:'Georgia', serif;"> Використовується підзапит для визначення сесій з більш ніж двома івентами, після чого здійснюється підрахунок івентів <code>user_engagement</code> для цих сесій. </span>
+<span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for User Engagement Event Count</span>
+
+'''sql
+-- Основний запит: підрахунок кількості івентів типу 'user_engagement'
+SELECT 
+    COUNT(*) AS user_engagement_events  -- Рахуємо кількість івентів user_engagement
+FROM 
+    data-analytics-mate.DA.event_params evp
+JOIN 
+    (
+        -- Підзапит: відбір сесій, де загальна кількість івентів більше 2
+        SELECT 
+            ga_session_id, 
+            COUNT(event_name) AS event_cnt  -- Рахуємо кількість івентів для кожної сесії
+        FROM 
+            data-analytics-mate.DA.event_params
+        GROUP BY 
+            ga_session_id
+        HAVING 
+            COUNT(event_name) > 2  -- Фільтруємо сесії з більше ніж 2 івентами
+    ) events 
+    ON evp.ga_session_id = events.ga_session_id 
+    AND evp.event_name = 'user_engagement';  -- Обираємо лише івенти типу user_engagement
+    '''
+    
