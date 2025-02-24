@@ -129,8 +129,8 @@ ORDER BY date, country;
 
 <span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
 <span style="color:#008080; font-family:'Georgia', serif; font-size:16px;">
-Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>).
-Вивожу інформацію в розрізі пристроїв (<code>device</code>). </span>
+
+### <span style="color:#8B0000; font-family:'Georgia', serif;">1. Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>). Вивожу інформацію в розрізі пристроїв</span>
 ```sql
 -- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
 SELECT
