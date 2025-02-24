@@ -1,6 +1,6 @@
 # Data Analyst Portfolio
 
-Welcome to my repository! My name is **[Your Name]** and I am a Data Analyst with experience in various tools and methodologies for data analysis. Here, you will find projects and examples that show my approach to working with data.
+Welcome to my repository! My name is **Ivan Kusurhashev** and I am a Data Analyst with experience in various tools and methodologies for data analysis. Here, you will find projects and examples that show my approach to working with data.
 
 ## Skills
 
