@@ -1,121 +1,16 @@
-# <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+# Data Analyst Portfolio
 
-## <span style="color:#000080; font-family:'Georgia', serif;">This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity. It computes key metrics (account count, sent, open, and click-through messages) across dimensions such as date, country, send interval, verification, and subscription status. Using multiple CTEs and UNION, it calculates country-level totals and ranks, filtering to the top 10 countries. The resulting dataset serves as the basis for Looker Studio visualizations to compare user behavior and identify key markets.</span>
+Welcome to my repository! My name is **Ivan Kusurhashev** and I am a Data Analyst with experience in various tools and methodologies for data analysis. Here, you will find projects and examples that show my approach to working with data.
 
-## <span style="color:#8B0000; font-family:'Georgia', serif;">Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти. Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.</span>
+## Skills
 
-### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
+- **Spreadsheets (Excel/Google Sheets):** Proficient in Pivot Tables, data cleaning, and creating insightful visualizations.
+- **SQL:** Skilled in advanced queries, window functions, query optimization, and Common Table Expressions (CTEs).
+- **Python:** Experienced with data analysis libraries (Pandas, NumPy) and visualization tools (Matplotlib, Seaborn) for Exploratory Data Analysis (EDA).
+- **Tableau:** Can build interactive dashboards, data storytelling, and publishing reports.
+- **Statistics:** Knowledgeable in sampling, hypothesis testing, correlation analysis, and statistical significance.
+- **A/B Testing:** Experienced in planning, executing experiments, analyzing results, and reporting.
+- **Other Tools:** Jupyter Notebooks, Google Analytics, Git.
+- **Languages:** English (Intermediate).
 
-```sql
--- Основний SQL-запит для аналізу даних про акаунти та email-активність.
-WITH account_details AS (
-    -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
-    -- дати створення акаунта, країни, інтервалу відправлення, верифікації та підписки.
-    SELECT
-        s.date AS date,                          -- Дата створення акаунта.
-        sp.country,                              -- Країна користувача.
-        a.send_interval,                         -- Інтервал відправлення, встановлений акаунтом.
-        a.is_verified,                           -- Прапорець: акаунт верифіковано (TRUE(1)/FALSE(0)).
-        a.is_unsubscribed,                       -- Прапорець: користувач відписався (TRUE(1)/FALSE(0)).
-        COUNT(DISTINCT a.id) AS account_cnt       -- Кількість унікальних створених акаунтів.
-    FROM `DA.session` s
-    JOIN `DA.account_session` acs ON acs.ga_session_id = s.ga_session_id
-    JOIN `DA.account` a ON acs.account_id = a.id
-    JOIN `DA.session_params` sp ON sp.ga_session_id = s.ga_session_id
-    GROUP BY s.date, sp.country, a.send_interval, a.is_verified, a.is_unsubscribed
-),
-email_details AS (
-    -- CTE: Рахуємо основні метрики email-активності:
-    -- кількість відправлених (sent_msg), відкритих (open_msg) та переходів по email (visit_msg) у розрізі
-    -- дати відправлення email, країни, інтервалу відправлення, верифікації та підписки.
-    SELECT
-        DATE_ADD(s.date, INTERVAL es.sent_date DAY) AS date, -- Обчислення дати з урахуванням інтервалу відправлення.
-        sp.country,                            -- Країна користувача.
-        a.send_interval,                       -- Інтервал відправлення, встановлений акаунтом.
-        a.is_verified,                         -- Прапорець: акаунт верифіковано (TRUE(1)/FALSE(0)).
-        a.is_unsubscribed,                     -- Прапорець: користувач відписався (TRUE(1)/FALSE(0)).
-        COUNT(DISTINCT es.id_message) AS sent_msg,          -- Унікальна кількість відправлених email.
-        COUNT(DISTINCT eo.id_message) AS open_msg,          -- Унікальна кількість відкритих email.
-        COUNT(DISTINCT ev.id_message) AS visit_msg          -- Унікальна кількість переходів по email.
-    FROM `DA.email_sent` es
-    LEFT JOIN `DA.email_open` eo ON es.id_message = eo.id_message
-    LEFT JOIN `DA.email_visit` ev ON es.id_message = ev.id_message
-    JOIN `DA.account` a ON es.id_account = a.id
-    JOIN `DA.account_session` acs ON acs.account_id = a.id
-    JOIN `DA.session` s ON acs.ga_session_id = s.ga_session_id
-    JOIN `DA.session_params` sp ON sp.ga_session_id = s.ga_session_id
-    GROUP BY date, sp.country, a.send_interval, a.is_verified, a.is_unsubscribed
-),
-combined_data AS (
-    -- CTE: Об’єднуємо дані з account_details та email_details в одному наборі даних.
-    SELECT
-        date,
-        country,
-        send_interval,
-        is_verified,
-        is_unsubscribed,
-        account_cnt,
-        NULL AS sent_msg,
-        NULL AS open_msg,
-        NULL AS visit_msg
-    FROM account_details
-    UNION ALL
-    SELECT
-        date,
-        country,
-        send_interval,
-        is_verified,
-        is_unsubscribed,
-        NULL AS account_cnt,
-        sent_msg,
-        open_msg,
-        visit_msg
-    FROM email_details
-),
-union_all AS (
-    -- CTE: Об’єднуємо та агрегуємо дані з combined_data.
-    SELECT
-        date,
-        country,
-        send_interval,
-        is_verified,
-        is_unsubscribed,
-        SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів, без NULL значень.
-        SUM(sent_msg) AS sent_msg,             -- Сумарна кількість відправлених email, без NULL значень.
-        SUM(open_msg) AS open_msg,             -- Сумарна кількість відкритих email, без NULL значень.
-        SUM(visit_msg) AS visit_msg            -- Сумарна кількість переходів по email, без NULL значень.
-    FROM combined_data
-    GROUP BY date, country, send_interval, is_verified, is_unsubscribed
-),
-account_metrics AS (
-    -- CTE: Додаємо до даних із union_all додаткову метрику:
-    -- загальну кількість акаунтів для кожної країни (total_country_account_cnt).
-    SELECT *,
-        SUM(account_cnt) OVER (PARTITION BY country) AS total_country_account_cnt -- Загальна кількість акаунтів по країні.
-    FROM union_all
-),
-account_ranks AS (
-    -- CTE: Додаємо рейтинг країн (rank_total_country_account_cnt) за кількістю акаунтів.
-    SELECT *,
-        DENSE_RANK() OVER (ORDER BY total_country_account_cnt DESC) AS rank_total_country_account_cnt -- Рейтинг країн.
-    FROM account_metrics
-),
-email_metrics AS (
-    -- CTE: Додаємо до даних із account_ranks додаткову метрику:
-    -- загальну кількість відправлених email для кожної країни (total_country_sent_cnt).
-    SELECT *,
-        SUM(sent_msg) OVER (PARTITION BY country) AS total_country_sent_cnt -- Загальна кількість відправлених email по країні.
-    FROM account_ranks
-),
-email_ranks AS (
-    -- CTE: Додаємо рейтинг країн (rank_total_country_sent_cnt) за кількістю відправлених email.
-    SELECT *,
-        DENSE_RANK() OVER (ORDER BY total_country_sent_cnt DESC) AS rank_total_country_sent_cnt -- Рейтинг країн.
-    FROM email_metrics
-)
--- Фінальний запит: Фільтруємо дані для топ-10 країн за створеними акаунтами або відправленими email
--- та сортуємо за датою та країною.
-SELECT *
-FROM email_ranks
-WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
-ORDER BY date, country;
+My projects reflect hands-on experience in solving real-world problems. I welcome any feedback and collaboration opportunities!
