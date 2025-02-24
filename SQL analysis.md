@@ -118,7 +118,7 @@ email_ranks AS (
 SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
-ORDER BY date, country;
+ORDER BY date, country;'''
 
 
 ### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
