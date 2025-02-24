@@ -120,9 +120,8 @@ FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
 
----
 
-### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query for Session Engagement Ratio</span>
+### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
 
 #### <span style="color:#008080; font-family:'Georgia', serif; font-size:16px;">
 Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>).  
