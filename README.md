@@ -1,4 +1,4 @@
-Welcome to my repository! My name is [Your Name], and I am a Data Analyst with experience in various tools and methodologies for data analysis. Here, you will find projects and examples showcasing my approach to working with data:
+Welcome to my repository! My name is Ivan Kusurhashev, and I am a Data Analyst with experience in various tools and methodologies for data analysis. Here, you will find projects and examples showcasing my approach to working with data:
 
 Spreadsheets (Excel/Google Sheets): Proficient in Pivot Tables, data cleaning, and creating insightful visualizations.
 SQL: Skilled in advanced queries, window functions, query optimization, and Common Table Expressions (CTEs).
