@@ -127,10 +127,14 @@ ORDER BY date, country;
 
 ---
 
-<span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
-<span style="color:#008080; font-family:'Georgia', serif; font-size:16px;">
 
-### <span style="color:#8B0000; font-family:'Georgia', serif;">1. Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>). Вивожу інформацію в розрізі пристроїв</span>
+## <span style="color:#000080; font-family:'Georgia', serif;">2. SQL Query for Session Engagement Ratio.</span>
+
+### <span style="color:#8B0000; font-family:'Georgia', serif;">1. Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти.</span>
+
+> Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>). Вивожу інформацію в розрізі пристроїв</span>
+
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
 ```sql
 -- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
 SELECT
