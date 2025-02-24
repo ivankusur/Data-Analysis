@@ -120,6 +120,7 @@ FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;'''
 
+---
 
 ### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">2. SQL Query for Session Engagement Ratio</span>
 
@@ -148,4 +149,66 @@ GROUP BY
     sp.device  -- Групуємо результати за пристроєм
 ORDER BY 
     session_ratio DESC;  -- Сортуємо за спаданням долі сесій
+
+---
+
+### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">3. SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+
+#### <span style="color:#000080; font-family:'Georgia', serif;"> Рахую відсоток витрат по місяцях від загальних витрат за весь період</span>
+
+<span style="color:#8B0000; font-family:'Georgia', serif;">
+Використовую window функцію для обчислення відсотків. Представляю результат у форматі, де для кожного місяця відображається відсоток від загальних витрат.
+</span>
+
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
+
+```sql
+-- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
+SELECT
+    sales_month,                 -- Місяць (формат: 'YYYY-MM')
+    cost_by_month,               -- Загальна сума витрат за місяць
+    -- Обчислення відсотку: витрати за місяць поділені на загальну суму витрат * 100
+    cost_by_month / SUM(cost_by_month) OVER () * 100 AS percentage_of_total_expenses
+FROM (
+    SELECT
+        FORMAT_TIMESTAMP('%Y-%m', date) AS sales_month,  -- Форматуємо дату до формату 'YYYY-MM'
+        SUM(cost) AS cost_by_month                        -- Обчислюємо загальну суму витрат за місяць
+    FROM `DA.paid_search_cost`
+    GROUP BY sales_month                                  -- Групуємо дані за місяцем
+) AS montly_cost
+ORDER BY sales_month;  -- Сортуємо результати за місяцем
+
+---
+
+### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
+
+### <span style="color:#000080; font-family:'Georgia', serif;">4. Рахую кількість івентів типу <code>user_engagement</code> тільки для тих сесій, в яких загальна кількість івентів перевищує 2.</span>
+
+<span style="color:#8B0000; font-family:'Georgia', serif;">
+Використовується підзапит для визначення сесій з більш ніж двома івентами, після чого здійснюється підрахунок івентів <code>user_engagement</code> для цих сесій.
+</span>
+
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for User Engagement Event Count</span>
+
+```sql
+-- Основний запит: підрахунок кількості івентів типу 'user_engagement'
+SELECT 
+    COUNT(*) AS user_engagement_events  -- Рахуємо кількість івентів user_engagement
+FROM 
+    data-analytics-mate.DA.event_params evp
+JOIN 
+    (
+        -- Підзапит: відбір сесій, де загальна кількість івентів більше 2
+        SELECT 
+            ga_session_id, 
+            COUNT(event_name) AS event_cnt  -- Рахуємо кількість івентів для кожної сесії
+        FROM 
+            data-analytics-mate.DA.event_params
+        GROUP BY 
+            ga_session_id
+        HAVING 
+            COUNT(event_name) > 2  -- Фільтруємо сесії з більше ніж 2 івентами
+    ) events 
+    ON evp.ga_session_id = events.ga_session_id 
+    AND evp.event_name = 'user_engagement'  -- Обираємо лише івенти типу user_engagement
 
