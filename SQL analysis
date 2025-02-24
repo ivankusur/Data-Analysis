@@ -1,3 +1,11 @@
+# SQL Query Description Опис SQL-запиту
+
+## This SQL query aggregates e-commerce data from BigQuery to analyze account creation and email activity. It computes key metrics (account count, sent, open, and click-through messages) across dimensions such as date, country, send interval, verification, and subscription status. Using multiple CTEs and UNION, it calculates country-level totals and ranks, filtering to the top 10 countries. The resulting dataset serves as the basis for Looker Studio visualizations to compare user behavior and identify key markets.
+## Цей SQL-запит агрегує дані електронної комерції з BigQuery для аналізу створення акаунтів та активності електронної пошти. Він обчислює ключові показники (кількість акаунтів, надісланих, відкритих і переходів) за такими параметрами, як дата, країна, інтервал між відправленнями, верифікація і статус підписки. Використовуючи кілька CTE та UNION, він обчислює загальні показники та рейтинги на рівні країни, фільтруючи до 10 найкращих країн. Отриманий набір даних слугує основою для візуалізацій Looker Studio для порівняння поведінки користувачів та визначення ключових ринків.
+
+### SQL Query for E-commerce Data Analysis
+
+```sql
 -- Основний SQL-запит для аналізу даних про акаунти та email-активність.
 WITH account_details AS (
     -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
@@ -7,8 +15,8 @@ WITH account_details AS (
         sp.country,                              -- Країна користувача.
         a.send_interval,                         -- Інтервал відправлення, встановлений акаунтом.
         a.is_verified,                           -- Прапорець: акаунт верифіковано (TRUE(1)/FALSE(0)).
-        a.is_unsubscribed,                      -- Прапорець: користувач відписався (TRUE(1)/FALSE(0)).
-        COUNT(DISTINCT a.id) AS account_cnt      -- Кількість унікальних створених акаунтів.
+        a.is_unsubscribed,                       -- Прапорець: користувач відписався (TRUE(1)/FALSE(0)).
+        COUNT(DISTINCT a.id) AS account_cnt       -- Кількість унікальних створених акаунтів.
     FROM `DA.session` s
     JOIN `DA.account_session` acs ON acs.ga_session_id = s.ga_session_id
     JOIN `DA.account` a ON acs.account_id = a.id
@@ -38,7 +46,7 @@ email_details AS (
     GROUP BY date, sp.country, a.send_interval, a.is_verified, a.is_unsubscribed
 ),
 combined_data AS (
-    -- CTE: Об’єднуємо дані з account_ranks та email_ranks в одному наборі даних.
+    -- CTE: Об’єднуємо дані з account_details та email_details в одному наборі даних.
     SELECT
         date,
         country,
@@ -48,7 +56,7 @@ combined_data AS (
         account_cnt,
         NULL AS sent_msg,
         NULL AS open_msg,
-        NULL AS visit_msg,
+        NULL AS visit_msg
     FROM account_details
     UNION ALL
     SELECT
@@ -60,7 +68,7 @@ combined_data AS (
         NULL AS account_cnt,
         sent_msg,
         open_msg,
-        visit_msg,
+        visit_msg
     FROM email_details
 ),
 union_all AS (
@@ -72,14 +80,14 @@ union_all AS (
         is_verified,
         is_unsubscribed,
         SUM(account_cnt) AS account_cnt,     -- Сумарна кількість акаунтів, без NULL значень.
-        SUM(sent_msg) AS sent_msg,           -- Сумарна кількість відправлених email, без NULL значень.
-        SUM(open_msg) AS open_msg,           -- Сумарна кількість відкритих email, без NULL значень.
-        SUM(visit_msg) AS visit_msg,         -- Сумарна кількість переходів по email, без NULL значень.
+        SUM(sent_msg) AS sent_msg,             -- Сумарна кількість відправлених email, без NULL значень.
+        SUM(open_msg) AS open_msg,             -- Сумарна кількість відкритих email, без NULL значень.
+        SUM(visit_msg) AS visit_msg            -- Сумарна кількість переходів по email, без NULL значень.
     FROM combined_data
-    GROUP BY 1, 2, 3, 4, 5
+    GROUP BY date, country, send_interval, is_verified, is_unsubscribed
 ),
 account_metrics AS (
-    -- CTE: Додаємо до даних із account_details додаткову метрику:
+    -- CTE: Додаємо до даних із union_all додаткову метрику:
     -- загальну кількість акаунтів для кожної країни (total_country_account_cnt).
     SELECT *,
         SUM(account_cnt) OVER (PARTITION BY country) AS total_country_account_cnt -- Загальна кількість акаунтів по країні.
@@ -92,7 +100,7 @@ account_ranks AS (
     FROM account_metrics
 ),
 email_metrics AS (
-    -- CTE: Додаємо до даних із email_details додаткову метрику:
+    -- CTE: Додаємо до даних із account_ranks додаткову метрику:
     -- загальну кількість відправлених email для кожної країни (total_country_sent_cnt).
     SELECT *,
         SUM(sent_msg) OVER (PARTITION BY country) AS total_country_sent_cnt -- Загальна кількість відправлених email по країні.
@@ -109,4 +117,4 @@ email_ranks AS (
 SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
-ORDER BY date, country
+ORDER BY date, country;
