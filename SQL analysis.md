@@ -134,7 +134,7 @@ ORDER BY date, country;
 
 > Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>). Вивожу інформацію в розрізі пристроїв</span>
 
-#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query </span>
 ```sql
 -- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
 SELECT
@@ -160,10 +160,13 @@ ORDER BY
 
 ---
 
-<span style="color:#1E90FF; font-family:'Arial', sans-serif;">3. SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
-<span style="color:#000080; font-family:'Georgia', serif;">Рахую відсоток витрат по місяцях від загальних витрат за весь період</span>
-<span style="color:#8B0000; font-family:'Georgia', serif;"> Використовую window функцію для обчислення відсотків. Представляю результат у форматі, де для кожного місяця відображається відсоток від загальних витрат. </span>
-<span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
+## <span style="color:#000080; font-family:'Georgia', serif;">3. SQL Query Description.</span>
+
+### <span style="color:#8B0000; font-family:'Georgia', serif;">Рахую відсоток витрат по місяцях від загальних витрат за весь період.</span>
+
+> Використовую window функцію для обчислення відсотків. Представляю результат у форматі, де для кожного місяця відображається відсоток від загальних витрат.
+
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for Expense Percentage by Month</span>
 ```sql
 -- Основний SQL-запит для обчислення відсотку витрат по місяцях від загальних витрат.
 SELECT
@@ -183,12 +186,13 @@ ORDER BY
 ```
 
 ---
+## <span style="color:#000080; font-family:'Georgia', serif;">4. SQL Query Description.</span>
 
-<span style="color:#1E90FF; font-family:'Arial', sans-serif;">4. SQL Query Description</span> <span style="color:#32CD32; font-family:'Arial', sans-serif;">Опис SQL-запиту</span>
-<span style="color:#000080; font-family:'Georgia', serif;">Рахую кількість івентів типу <code>user_engagement</code> тільки для тих сесій, в яких загальна кількість івентів перевищує 2.</span>
-<span style="color:#8B0000; font-family:'Georgia', serif;"> Використовується підзапит для визначення сесій з більш ніж двома івентами, після чого здійснюється підрахунок івентів <code>user_engagement</code> для цих сесій. </span>
-<span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for User Engagement Event Count</span>
+### <span style="color:#8B0000; font-family:'Georgia', serif;">Рахую кількість івентів типу <code>user_engagement</code> тільки для тих сесій, в яких загальна кількість івентів перевищує 2.</span>
 
+> Використовується підзапит для визначення сесій з більш ніж двома івентами, після чого здійснюється підрахунок івентів <code>user_engagement</code> для цих сесій. 
+
+#### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for User Engagement Event Count</span>
 ```sql
 -- Основний запит: підрахунок кількості івентів типу 'user_engagement'
 SELECT 
