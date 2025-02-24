@@ -144,5 +144,8 @@ FROM (
     FROM `DA.paid_search_cost`
     GROUP BY sales_month                                  -- Групуємо дані за місяцем
 ) AS montly_cost
-ORDER BY sales_month;  -- Сортуємо результати за місяцем
+ORDER BY sales_month;  -- Сортуємо результати за місяцем;
+
+
+
 
