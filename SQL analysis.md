@@ -6,7 +6,7 @@
 
 #### <span style="color:#2E8B57; font-family:'Verdana', sans-serif;">SQL Query for E-commerce Data Analysis</span>
 
-```sql
+```
 -- Основний SQL-запит для аналізу даних про акаунти та email-активність.
 WITH account_details AS (
     -- CTE: Рахуємо кількість створених акаунтів (account_cnt) у розрізі:
