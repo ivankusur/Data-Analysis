@@ -119,3 +119,34 @@ SELECT *
 FROM email_ranks
 WHERE rank_total_country_account_cnt <= 10 OR rank_total_country_sent_cnt <= 10
 ORDER BY date, country;
+
+---
+
+### <span style="color:#1E90FF; font-family:'Arial', sans-serif;">SQL Query for Session Engagement Ratio</span>
+
+#### <span style="color:#008080; font-family:'Georgia', serif; font-size:16px;">
+Розраховую долю івентів, в яких є відмітка <code>session_engaged = 1</code> від усіх івентів, де є значення в цьому полі (відмінне від <code>NULL</code>).  
+Вивожу інформацію в розрізі пристроїв (<code>device</code>).  
+</span>
+```sql
+-- Вибираємо тип пристрою та розраховуємо долю сесій, де session_engaged = '1'
+SELECT
+    sp.device AS device,  -- Тип пристрою
+    -- Розрахунок долі: сума подій з session_engaged = '1' поділена на загальну кількість подій
+    ROUND(
+        SUM(CASE WHEN ep.value.string_value = '1' THEN 1 ELSE 0 END) / COUNT(*),
+        5
+    ) AS session_ratio  -- Доля сесій з engaged як рядкове значення (округлено до 5 знаків)
+FROM
+    `DA.event_params` p,
+    UNNEST(p.event_params) AS ep  -- Розпаковуємо масив event_params
+JOIN 
+    `DA.session_params` sp ON sp.ga_session_id = p.ga_session_id  -- З'єднуємо з інформацією сесій
+WHERE
+    ep.key = 'session_engaged'  -- Фільтруємо за ключем session_engaged
+    AND ep.value.string_value IS NOT NULL  -- Враховуємо лише записи, де значення не NULL
+GROUP BY 
+    sp.device  -- Групуємо результати за пристроєм
+ORDER BY 
+    session_ratio DESC;  -- Сортуємо за спаданням долі сесій
+
